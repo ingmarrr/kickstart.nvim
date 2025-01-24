@@ -1,46 +1,7 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-
-Kickstart.nvim is *not* a distribution.
-
-Kickstart.nvim is a template for your own configuration.
-  The goal is that you can read every line of code, top-to-bottom, understand
-  what your configuration is doing, and modify it to suit your needs.
-
-  Once you've done that, you should start exploring, configuring and tinkering to
-  explore Neovim!
-
-  If you don't know anything about Lua, I recommend taking some time to read through
-  a guide. One possible example:
-  - https://learnxinyminutes.com/docs/lua/
-
-
-  And then you can explore or search through `:help lua-guide`
-  - https://neovim.io/doc/user/lua-guide.html
-
-
-Kickstart Guide:
-
-I have left several `:help X` comments throughout the init.lua
-You should run that command and read that help section for more information.
-
-In addition, I have some `NOTE:` items throughout the file.
-These are for you, the reader to help understand what is happening. Feel free to delete
-them once you know what you're doing, but they should serve as a guide for when you
-are first encountering a few different constructs in your nvim config.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now :)
---]]
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+vim.opt.swapfile = false
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
@@ -63,15 +24,27 @@ vim.opt.rtp:prepend(lazypath)
 -- [[ Configure plugins ]]
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
---
+-- local noirbuddy_lualine = require('noirbuddy.plugins.lualine')
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
+--   -- MY PLUGINS
+	-- 'github/copilot.vim',
+	-- {
+	--   'saecki/crates.nvim',
+	--   tag = 'v0.4.0',
+	--   dependencies = { 'nvim-lua/plenary.nvim' },
+	--   config = function()
+	--     require('crates').setup()
+	--   end,
+	-- },
+
   -- NOTE: First, some plugins that don't require any configuration
 
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
+  'tpope/vim-commentary',
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
@@ -112,7 +85,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -125,6 +98,7 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      signcolumn = false,  -- Toggle with `:Gitsigns toggle_signs`
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
 
@@ -152,14 +126,66 @@ require('lazy').setup({
     },
   },
 
+  -- ======================
+  -- BEGIN .THEMES
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    'AlexvZyl/nordic.nvim',
+    lazy = false,
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'onedark'
+      -- require 'nordic'.load()
+    end
+  },
+  {
+    "xero/miasma.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- vim.cmd("colorscheme miasma")
     end,
   },
+  {
+    "rebelot/kanagawa.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- vim.cmd("colorscheme kanagawa")
+    end,
+  },
+  {
+    "andreasvc/vim-256noir",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- vim.cmd("colorscheme 256_noir")
+    end,
+  },
+  {
+    "Alligator/accent.vim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- vim.cmd("colorscheme accent");
+    end,
+  },
+  {
+    'jesseleite/nvim-noirbuddy',
+    dependencies = {
+      { 'tjdevries/colorbuddy.nvim' }
+    },
+    lazy = false,
+    priority = 1000,
+    opts = {
+      presets = 'minimal'
+    },
+  },
+
+  -- require('noirbuddy').setup {
+  -- preset = 'miami-nights',
+-- }
+  -- },
+  -- END THEMES
+  -- ======================
 
   {
     -- Set lualine as statusline
@@ -169,9 +195,12 @@ require('lazy').setup({
       options = {
         icons_enabled = false,
         theme = 'onedark',
+        -- theme = noirbuddy_lualine.theme,
         component_separators = '|',
         section_separators = '',
       },
+      -- sections = noirbuddy_lualine.sections,
+      -- inactive_sections = noirbuddy_lualine.inactive_sections,
     },
   },
 
@@ -229,7 +258,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -240,7 +269,7 @@ require('lazy').setup({
 vim.o.hlsearch = false
 
 -- Make line numbers default
-vim.wo.number = true
+vim.wo.number = false
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -274,6 +303,29 @@ vim.o.completeopt = 'menuone,noselect'
 vim.o.termguicolors = true
 
 -- [[ Basic Keymaps ]]
+
+-- =====================
+-- BEGIN CUSTOM .KEY MAPS
+
+vim.api.nvim_set_keymap('n', '<C-a>', '<C-y>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('t', 'Esc', '<C-\\><C-n>', { noremap = true, silent = true })
+
+local function openFileInCurrentDir()
+  local currentDir = vim.fn.expand('%:p:h') .. '/'
+  local cmd = ':e ' .. currentDir
+  vim.fn.histadd('cmd', cmd)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd, true, false, true), 'n', true)
+end
+
+vim.api.nvim_set_keymap('n', '<leader>n', '', { noremap = true, callback = openFileInCurrentDir })
+vim.api.nvim_set_keymap('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>l', '', { noremap = true, callback = function() vim.wo.number = false end})
+
+
+vim.keymap.set('n', '<C-j>', function() vim.cmd('Explore') end, { silent = true })
+
+-- END CUSTOM KEY MAPS
+-- =====================
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -345,7 +397,7 @@ local function live_grep_git_root()
   local git_root = find_git_root()
   if git_root then
     require('telescope.builtin').live_grep({
-      search_dirs = {git_root},
+      search_dirs = { git_root },
     })
   end
 end
@@ -364,7 +416,7 @@ vim.keymap.set('n', '<leader>/', function()
 end, { desc = '[/] Fuzzily search in current buffer' })
 
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>ss', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
@@ -378,8 +430,11 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
-
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'odin', 'bash' },
+    modules         = {},
+    sync_install    = true,
+    ignore_install  = {},
+  -- 'DanielGavin/ols', -- Odin Language Server
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
 
@@ -511,13 +566,40 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
+  clangd = {
+    cmd = {
+      "clangd",
+      "--background-index",
+      "--clang-tidy",
+      "--header-insertion=iwyu",
+      "--completion-style=detailed",
+      "--function-arg-placeholders",
+      "--fallback-style=llvm",
+      -- "-std=c++20",  -- Add this line to enable C++20
+      "--extra-arg=-I/usr/local/Cellar/glib/2.74.6/include/glib-2.0",
+      "--extra-arg=-I/usr/local/Cellar/glib/2.74.6/lib/glib-2.0/include",
+
+    },
+    filetypes = {"c", "cpp", "objc", "objcpp", "cuda"},
+    init_options = {
+      fallbackFlags = { "-std=c++20" }  -- Add this line as a fallback
+    }
+  },
+  gopls = {
+    format = {
+      tabSize = 2,
+    }
+  },
   -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
+  tsserver = {},
+  html = {
+    filetypes = { 'html', 'twig', 'hbs', 'py', 'python' },
+    format = {
+      tabSize = 2,
+      insertSpaces = true
+    }
+  },
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -601,3 +683,164 @@ cmp.setup {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+
+-- COLORS
+local background_color = "#1a1918"
+
+vim.cmd("highlight Normal guibg=" .. background_color)
+vim.cmd("highlight NonText guibg=" .. background_color)
+vim.cmd("highlight LineNr guibg=" .. background_color)
+vim.cmd("highlight Folded guibg=" .. background_color)
+vim.cmd("highlight SignColumn guibg=" .. background_color)
+vim.cmd("highlight StatusLine guibg=" .. background_color)
+vim.cmd("highlight StatusLineNC guibg=" .. background_color)
+vim.cmd("highlight CmdLine guibg=" .. background_color)
+vim.cmd("highlight CmdLineEnter guibg=" .. background_color)
+vim.cmd("highlight EndOfBuffer guibg=" .. background_color)
+vim.cmd("highlight MsgArea guibg=" .. background_color)
+vim.cmd("highlight VertSplit guibg=" .. background_color)
+vim.cmd("highlight WildMenu guibg=" .. background_color)
+vim.cmd("highlight Pmenu guibg=" .. background_color)
+vim.cmd("highlight PmenuSel guibg=" .. background_color)
+vim.cmd("highlight PmenuSbar guibg=" .. background_color)
+vim.cmd("highlight PmenuThumb guibg=" .. background_color)
+
+
+-- AUTOCLOSING
+
+-- vim.api.nvim_set_keymap('i', '{', '{}<Left>', { noremap = true })
+-- vim.api.nvim_set_keymap('i', '[', '[]<Left>', { noremap = true })
+-- vim.api.nvim_set_keymap('i', '(', '()<Left>', { noremap = true })
+
+-- copilot
+
+vim.g.copilot_no_tab_map = true
+vim.api.nvim_set_keymap("i", "<C-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+vim.g.copilot_filetypes = {
+  ["*"] = false,
+}
+
+-- commentary
+
+vim.api.nvim_set_keymap('t', '<Esc>', [[<C-\><C-n>]], {noremap = true})
+vim.api.nvim_set_keymap("n", "<C-m>", ":Commentary<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("v", "<C-m>", ":Commentary<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>t', [[
+  <cmd>vsplit<CR>
+  <cmd>wincmd l<CR>
+  <cmd>terminal<CR>
+]], { noremap = true, silent = true, desc = "Create vertical split with terminal" })
+
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "html",
+  callback = function()
+    vim.opt_local.shiftwidth = 2 -- Sets the number of spaces per indentation level
+    vim.opt_local.tabstop = 2    -- Sets the width of a tab character
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "cpp",
+    callback = function()
+      vim.opt_local.tabstop = 4
+      vim.opt_local.shiftwidth = 4
+      vim.opt_local.expandtab = true
+      vim.opt_local.softtabstop = 4
+    end,
+    group = vim.api.nvim_create_augroup("CPPSettings", { clear = true }),
+})
+
+-- vim.o.tabstop = 4      -- A TAB character looks like 4 spaces
+-- vim.o.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
+-- vim.o.softtabstop = 4  -- Number of spaces inserted instead of a TAB character
+-- vim.o.shiftwidth = 4   -- Number of spaces inserted when indenting
+vim.opt_global.tabstop = 4
+vim.opt_global.expandtab = true
+vim.opt_global.shiftwidth = 4
+vim.opt_global.softtabstop = 4
+
+vim.opt_global.wrap = false
+
+vim.opt.list = true
+vim.opt.listchars = {
+    space = '·',
+    tab = '→ ',
+    -- tab = '▷',
+    eol = '↵',
+    trail = '•',
+    -- trail = '○',
+    extends = '❯',
+    -- extends = '◣',
+    precedes = '❮',
+    -- precedes = '◢',
+    -- nbsp:'○',
+}
+
+-- local Color, colors, Group, groups, styles = require('colorbuddy').setup {}
+
+-- Group.new('@method', colors.noir_0, nil, styles.bold + styles.italic)
+
+-- require('noirbuddy').setup {
+--   presets = 'minimal' , -- #FF008F
+--   colors = {
+--     primary = '#ffdd33',
+--     secondary = '#ffdd33',
+--     -- noir_0 = '#ffdd33',
+--     noir_1 = '#ffdd33',
+--     -- noir_2 = '#ffdd33',
+--     -- noir_3 = '#ffdd33',
+--     -- noir_4 = '#ffdd33',
+--     -- noir_5 = '#ffdd33',
+--     -- noir_6 = '#ffdd33',
+--     -- noir_7 = '#ffdd33',
+--     -- noir_8 = '#ffdd33',
+--     noir_9 = '#ffdd33',
+--     diagnostic_info = '#ffdd33',
+--     diagnostic_error = '#ffdd33',
+--     diagnostic_warning = '#ffdd33',
+--     diagnostic_hint = '#ffdd33',
+--     diff_add = '#ffdd33',
+--     diff_change = '#ffdd33',
+--     diff_delete = '#ffdd33',
+--   }
+-- }
+
+-- require("colorbuddy").colorscheme('gruvbuddy')
+
+-- local colorbuddy = require('colorbuddy')
+-- local Color = colorbuddy.Color
+-- local Group = colorbuddy.Group
+
+-- local c = colorbuddy.colors
+-- local s = colorbuddy.styles
+
+-- -- CSS && HTML Settings
+
+-- Color.new('light_gray', '#888888')
+-- Group.new('htmlString', c.light_gray, c.none, s.NONE)
+-- Group.new('cssValueNumber', c.light_gray, c.none, s.NONE)
+-- Group.new('cssValueLength', c.light_gray, c.none, s.NONE)
+-- Group.new('cssColor', c.light_gray, c.none, s.NONE)
+-- Group.new('cssStringQ', c.light_gray, c.none, s.NONE)
+-- Group.new('cssStringQQ', c.light_gray, c.none, s.NONE)
+
